@@ -1,0 +1,51 @@
+version: '1'
+services:
+  postgres-dev:
+    image: postgres
+    hostname: postgres-dev
+    container_name: postgres-dev-db
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_DB=dev
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - ./tmp-dev/postgresql/db:/var/lib/postgresql/data
+
+  app-backend:
+    build:
+      dockerfile: ./dev.Dockerfile
+      context: .
+    depends_on:
+      - postgres-dev
+    container_name: backend-app
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+
+  postgres-test:
+    image: postgres
+    hostname: postgres-test
+    container_name: postgres-tests-db
+    restart: always
+    ports:
+      - 5431:5432
+    environment:
+      - POSTGRES_DB=test
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - ./tmp-test/postgresql/db:/var/lib/postgresql/data
+
+  test-backend:
+    build:
+      dockerfile: ./test.Dockerfile
+      context: .
+    depends_on:
+      - postgres-test
+    container_name: backend
+    env_file:
+      - .env
